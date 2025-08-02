@@ -6,8 +6,7 @@ import os
 app = Flask(__name__)
 
 # --- Configuration and API Functions ---
-API_KEY = os.environ.get("992e439681dc5b48a5d39995302a08bb") # Reads from the environment
-
+API_KEY = os.environ.get("TMDB_API_KEY")
 TMDB_API_URL = "https://api.themoviedb.org/3"
 mood_genre_map = {
     "Happy": ["Comedy", "Family", "Adventure"], "Sad": ["Drama", "Romance"],
