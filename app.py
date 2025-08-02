@@ -2,11 +2,17 @@ from flask import Flask, render_template, request, jsonify
 import requests
 from functools import lru_cache
 import os
+from dotenv import load_dotenv
+
+# This line loads the .env file for local development
+load_dotenv()
 
 app = Flask(__name__)
 
 # --- Configuration and API Functions ---
+# This line works both locally and on Render
 API_KEY = os.environ.get("TMDB_API_KEY")
+
 TMDB_API_URL = "https://api.themoviedb.org/3"
 mood_genre_map = {
     "Happy": ["Comedy", "Family", "Adventure"], "Sad": ["Drama", "Romance"],
@@ -16,13 +22,16 @@ mood_genre_map = {
 
 @lru_cache(maxsize=1)
 def get_all_genres():
-    if not API_KEY: return {}
+    if not API_KEY: 
+        print("CRITICAL ERROR: TMDB_API_KEY environment variable not found.")
+        return {}
     try:
         response = requests.get(f"{TMDB_API_URL}/genre/movie/list", params={"api_key": API_KEY})
         response.raise_for_status()
         genres = response.json().get("genres", [])
         return {genre["id"]: genre["name"] for genre in genres}
-    except requests.RequestException:
+    except requests.RequestException as e:
+        print(f"Error fetching genres from TMDb: {e}")
         return {}
 
 # --- Flask Routes ---
@@ -66,7 +75,6 @@ def recommend():
         response = requests.get(api_endpoint, params=params)
         response.raise_for_status()
         api_response = response.json()
-        # Directly return the results, no extra processing needed
         return jsonify({
             "movies": api_response.get("results", []),
             "total_pages": api_response.get("total_pages", 1),
