@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMate | Fast Movie Discovery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1>🎬 MovieMatch</h1>
+            <p>Your portal to the world of cinema.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="filter-container">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="genre">Genre</label>
+                    <select id="genre" name="genre">
+                        {% for genre in genres %}<option value="{{ genre }}">{{ genre }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="mood">Mood</label>
+                    <select id="mood" name="mood">
+                        {% for mood in moods %}<option value="{{ mood }}">{{ mood }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sort-by">Sort By</label>
+                    <select id="sort-by" name="sort-by">
+                        <option value="popularity.desc">Popularity</option>
+                        <option value="release_date.desc">Release Date</option>
+                        <option value="vote_average.desc">Top Rated</option>
+                    </select>
+                </div>
+            </div>
+            <button id="filter-btn">Discover Movies</button>
+        </div>
+
+        <div id="loader" class="loader" style="display: none;"></div>
+        <div id="results-container"></div>
+        <div id="pagination-container" class="pagination-container"></div>
+    </main>
+
+    <footer class="site-footer">
+        <p></p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
