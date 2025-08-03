@@ -4,15 +4,12 @@ from functools import lru_cache
 import os
 from dotenv import load_dotenv
 
-# This line loads the .env file for local development
 load_dotenv()
 
 app = Flask(__name__)
 
 # --- Configuration and API Functions ---
-# This line works both locally and on Render
 API_KEY = os.environ.get("TMDB_API_KEY")
-
 TMDB_API_URL = "https://api.themoviedb.org/3"
 mood_genre_map = {
     "Happy": ["Comedy", "Family", "Adventure"], "Sad": ["Drama", "Romance"],
@@ -33,6 +30,18 @@ def get_all_genres():
     except requests.RequestException as e:
         print(f"Error fetching genres from TMDb: {e}")
         return {}
+
+# RE-ADD this function to get IMDb IDs
+@lru_cache(maxsize=128)
+def get_movie_details(movie_id):
+    try:
+        response = requests.get(f"{TMDB_API_URL}/movie/{movie_id}", params={"api_key": API_KEY})
+        response.raise_for_status()
+        data = response.json()
+        return {"imdb_id": data.get("imdb_id")}
+    except requests.RequestException:
+        return {"imdb_id": None}
+
 
 # --- Flask Routes ---
 @app.route('/')
@@ -67,7 +76,7 @@ def recommend():
         genre_ids = [str(genre_id_map.get(g)) for g in genres_to_use if g in genre_id_map]
         if genre_ids:
              params["with_genres"] = ",".join(genre_ids)
-    else: # Default to now_playing if no filters are set
+    else:
          api_endpoint = f"{TMDB_API_URL}/movie/now_playing"
          params.pop("sort_by", None)
 
@@ -75,9 +84,17 @@ def recommend():
         response = requests.get(api_endpoint, params=params)
         response.raise_for_status()
         api_response = response.json()
+        movie_pool = api_response.get("results", [])
+        total_pages = api_response.get("total_pages", 1)
+
+        # UPDATE: Enrich movies with IMDb ID
+        for movie in movie_pool:
+            details = get_movie_details(movie['id'])
+            movie["imdb_id"] = details.get("imdb_id")
+
         return jsonify({
-            "movies": api_response.get("results", []),
-            "total_pages": api_response.get("total_pages", 1),
+            "movies": movie_pool,
+            "total_pages": total_pages,
             "current_page": page
         })
     except requests.RequestException:
