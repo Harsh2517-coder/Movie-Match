@@ -59,15 +59,22 @@ document.addEventListener('DOMContentLoaded', () => {
         movies.forEach(movie => {
             const posterPath = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Image';
             
+            // UPDATE: Construct the IMDb URL
+            const imdbUrl = movie.imdb_id ? `https://www.imdb.com/title/${movie.imdb_id}/` : '#';
+            const linkTarget = movie.imdb_id ? 'target="_blank" rel="noopener noreferrer"' : '';
+
             const card = document.createElement('div');
             card.className = 'movie-card';
-            // Link is removed as we no longer fetch the IMDb ID
+            
+            // UPDATE: Wrap the content in an anchor tag to make it a clickable link
             card.innerHTML = `
-                <img src="${posterPath}" alt="${movie.title} Poster">
-                <div class="overlay">
-                    <h4>${movie.title}</h4>
-                    <p><span class="rating-star">⭐</span> ${movie.vote_average.toFixed(1)} / 10</p>
-                </div>
+                <a href="${imdbUrl}" ${linkTarget}>
+                    <img src="${posterPath}" alt="${movie.title} Poster">
+                    <div class="overlay">
+                        <h4>${movie.title}</h4>
+                        <p><span class="rating-star">⭐</span> ${movie.vote_average.toFixed(1)} / 10</p>
+                    </div>
+                </a>
             `;
             resultsContainer.appendChild(card);
         });
